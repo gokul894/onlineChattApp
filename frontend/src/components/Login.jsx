@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { API } from '../utils/Axios.jsx';
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ function Login() {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:8000/api/auth/login', {
+            const response = await API.post('/auth/login', {
                 usernameOremail,
                 password
             });

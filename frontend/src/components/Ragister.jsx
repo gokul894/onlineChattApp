@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { API } from '../utils/Axios';
 
 function Ragister() {
 
@@ -16,7 +16,7 @@ function Ragister() {
       e.preventDefault();
 
       try {
-        const response =  await axios.post('http://localhost:8000/api/auth/ragister', {fullName, username, email, password, confirmPass});
+        const response =  await API.post('/auth/ragister', {fullName, username, email, password, confirmPass});
         
         if(response.status === 200 && response.statusText === "OK"){
           setRegistrationDone(true);
