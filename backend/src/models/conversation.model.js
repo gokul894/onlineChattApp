@@ -6,20 +6,22 @@ const conversationSchema = mongoose.Schema({
         {
             type:mongoose.Schema.Types.ObjectId,
             ref:'User',
+            unique:true
         }
     ],
 
-    lastMessage: {
+    chatGroupRef:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Chat"
-    },
+        ref:"Chatgroup",
+        default:"0"
+    }
 
 }, { timestamps: true});
 
-
-conversationSchema.index({ participants:1 }, { unique:true });
 
 
 const conversation = mongoose.model('Conversation', conversationSchema);
 
 export default conversation;
+
+

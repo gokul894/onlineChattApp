@@ -11,7 +11,7 @@ const authStatus = createSlice({
         isLogedIn: loginStatusFromStorage,
         authUser: userFromStorage || {
             id:null,
-            fullName:null,
+            fullname:null,
             email:null,
             username:null
         },
