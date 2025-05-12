@@ -6,7 +6,6 @@ function Dashboard() {
 
   const user = useSelector(state => state.authStore.authUser);
 
-
   return (
     <div className='min-h-dvh bg-accent-light text-white flex flex-row'>
       <div className='w-[30%] border-r-2 flex flex-col'>
@@ -24,3 +23,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
