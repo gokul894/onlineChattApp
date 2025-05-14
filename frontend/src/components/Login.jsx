@@ -1,8 +1,8 @@
 import { API } from '../utils/Axios.jsx';
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { addUser, setIsLogedIn } from '../context/auth.storage.js';
+import { addUser } from '../context/auth.storage.js';
 import { toast } from 'react-toastify';
 
 function Login() {
@@ -21,12 +21,13 @@ function Login() {
                 password
             });
 
-            const AuthUser =await response.data.AuthUser;
-            const sms = await response.data.sms;
+            const AuthUser =await response.data.data;
+            const sms = await response.data.message;
+
+            // console.log(sms) debug 
 
             if(AuthUser?.id){
 
-                dispatch(setIsLogedIn(true));
                 dispatch(addUser({...AuthUser}));
 
                 toast.success(sms);

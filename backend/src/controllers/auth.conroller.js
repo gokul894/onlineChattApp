@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 
 const ragister = async (req, res) => {
@@ -42,9 +43,9 @@ const ragister = async (req, res) => {
     await newUser.save()
 
     return res.status(200)
-    .json({
-        "msg":"user created successfully"
-    })
+    .json(
+        new ApiResponse(200, {}, "Ragistration successfully ...")
+    )
 
 };
 
@@ -87,19 +88,20 @@ const login = async (req, res) => {
 
     await user.save({validate:false});
 
+    const AuthUser = {
+        id:user._id,
+        fullname:user.fullName,
+        email:user.email,
+        username:user.username,
+    }
+
     res
     .status(200)
     .cookie("accessToken", accessToken)
     .cookie("refreshToken", refreshToken)
-    .json({
-        "sms":"login successfull",
-        "AuthUser":{
-            id:user._id,
-            fullname:user.fullName,
-            email:user.email,
-            username:user.username,
-        }
-    });
+    .json(
+        new ApiResponse(200, AuthUser, "login successfully.. ")
+    );
 };
 
 const logout = async (req, res) => {
@@ -107,7 +109,7 @@ const logout = async (req, res) => {
     const requestedUser = await User.findById(user._id);
 
     if(!requestedUser){
-        return res.status(404)
+        return res.status(402)
         .json({
             "sms":"Unauthorised access !!"
         });

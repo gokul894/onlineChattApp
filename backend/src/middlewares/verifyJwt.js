@@ -6,7 +6,7 @@ const verifyJwt = async (req, res, next) => {
     const accessToken = req.cookies.accessToken;
 
     if(!accessToken) {
-        return res.status(404)
+        return res.status(402)
         .json({
             "sms":"Unauthorised access !!"
         })
@@ -15,7 +15,7 @@ const verifyJwt = async (req, res, next) => {
     const user = await jwt.verify(accessToken, config.access_token_secret);
 
     if(!user){
-        return res.status(404)
+        return res.status(402)
         .json({
             "sms":"Unauthorised access !!"
         });

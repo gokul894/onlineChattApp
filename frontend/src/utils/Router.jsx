@@ -1,4 +1,4 @@
-import {React, useEffect, useState} from "react"
+
 import {createBrowserRouter, createRoutesFromElements, Route} from "react-router-dom";
 import Layout from "../components/Layout.jsx";
 import Contact from "../components/Contact.jsx";
@@ -25,7 +25,6 @@ export const Router = createBrowserRouter(
 
         <Route 
         path="/dashboard" 
-
         element={
             <ProtectedRoute>
                 <Dashboard/>

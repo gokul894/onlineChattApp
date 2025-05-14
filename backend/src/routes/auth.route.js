@@ -4,7 +4,6 @@ import { login, logout, ragister} from "../controllers/auth.conroller.js";
 import { verifyJwt } from "../middlewares/verifyJwt.js";
 import { deleteMessage, listParticipants, sendMessage } from "../controllers/message.controller.js";
 
-
 const router = Router();
 
 //auth routes

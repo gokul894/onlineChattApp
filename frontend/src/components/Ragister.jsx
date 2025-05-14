@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom';
 import { API } from '../utils/Axios';
+import { toast } from 'react-toastify';
 
 function Ragister() {
 
@@ -19,6 +20,7 @@ function Ragister() {
         const response =  await API.post('/auth/ragister', {fullName, username, email, password, confirmPass});
         
         if(response.status === 200 && response.statusText === "OK"){
+          toast.success(response.data.message)
           setRegistrationDone(true);
         }
 
