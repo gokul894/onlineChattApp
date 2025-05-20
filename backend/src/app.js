@@ -14,6 +14,9 @@ app.use(express.urlencoded({extended:true, limit:"16kb"}))
 app.use(cors({
     origin:config.cors_url,
     credentials:true,
+    methods:['POST'],
+    exposedHeaders:['Authorization'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
 }))
 
 

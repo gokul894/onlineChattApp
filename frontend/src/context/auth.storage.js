@@ -13,22 +13,22 @@ const authStatus = createSlice({
             fullname:null,
             email:null,
             username:null
-        },
-
+        }
     },
 
     reducers:{
         addUser: function (state, action) {
-            Object.assign(state.authUser, {...action.payload});
+            const {id, fullname, email, username} = action.payload;
 
+            state.authUser = { id, fullname, email, username }
+        
             localStorage.setItem('authUser',JSON.stringify(state.authUser));
         },
 
         eraseUser: function (state, _) {
 
+            state.authUser = {id:null, fullname:null, email:null, username:null}
             localStorage.removeItem('authUser');
-
-            Object.assign(state.authUser, {id:null, fullName:null, email:null, username:null})
 
         },
 

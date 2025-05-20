@@ -92,13 +92,19 @@ const login = async (req, res) => {
         id:user._id,
         fullname:user.fullName,
         email:user.email,
-        username:user.username,
+        username:user.username
+    }
+
+    const options = {
+        httpOnly: true,
+        secure: false,
+        sameSite:'Lax'
     }
 
     res
     .status(200)
-    .cookie("accessToken", accessToken)
-    .cookie("refreshToken", refreshToken)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .json(
         new ApiResponse(200, AuthUser, "login successfully.. ")
     );
@@ -109,7 +115,7 @@ const logout = async (req, res) => {
     const requestedUser = await User.findById(user._id);
 
     if(!requestedUser){
-        return res.status(402)
+        return res.status(401)
         .json({
             "sms":"Unauthorised access !!"
         });
@@ -129,8 +135,14 @@ const logout = async (req, res) => {
     });
 };
 
+const authenticate = async (req, res) => {
+    res.status(200).json(
+        new ApiResponse(200, {}, 'authenticated')
+    )
+}
 
 
-export {ragister, login, logout};
+
+export {ragister, login, logout, authenticate};
 
 

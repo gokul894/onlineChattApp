@@ -23,7 +23,13 @@ function Navbar() {
   }
 
   useEffect(() => {
-    setIsLoggedIn(!!authUser.id)
+
+    if(authUser?.id){
+      setIsLoggedIn(true);
+    }else{
+      setIsLoggedIn(false)
+    }
+
   }, [authUser]);
 
   return (
@@ -35,10 +41,10 @@ function Navbar() {
           <NavLink to="about" className=' font-bold text-textStrong hover:text-accent text-2xl'>About</NavLink>
           <NavLink to="contact" className='font-bold text-textStrong hover:text-accent text-2xl'>Contact</NavLink>
 
-          {isLoggedIn ? (<>
+          {isLoggedIn ? <>
 
-            {viewProfile ? (<>
-
+            {viewProfile ? 
+            <>
             <div className='relative'>
 
               <div className='absolute top-5 backdrop-blur-sm right-0 z-20 border-2 p-5'>
@@ -51,25 +57,27 @@ function Navbar() {
               
 
             </div>
-             
-             </>) : (<>
+             </> : 
+
+             <>
              <div>
               <img src="http://test.dev.ldfkk" alt="img" className='h-fit w-fit border-2 border-accent-light hover:cursor-pointer ' onClick={(e) => {
                 profileImage(e)
               }} />
             </div>
+              </>
 
-              </>)}
+              }
             
-          </>) 
+          </>
 
-          : (<>
+          : <>
 
             <NavLink to="login" className='font-bold text-textStrong hover:text-accent text-2xl' 
             // i want to apply event listener here
             >Login</NavLink>
             
-          </>)}
+          </>}
         
         </div>
     </div>

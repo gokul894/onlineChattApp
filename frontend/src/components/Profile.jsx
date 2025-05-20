@@ -1,19 +1,28 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { API } from "../utils/Axios";
+import { eraseUser } from "../context/auth.storage";
 
 
 function Profile() {
 
-    const {_, fullname, email, username} = useSelector(state => state.authStore.authUser);
+    const { _, fullname, email, username} = useSelector(state => state.authStore.authUser);
+    const dispatch = useDispatch();
+
 
     const clickHandler = async (e) => {
         e.preventDefault();
+        // console.log('im from profile.jsx',tokens)
 
         try {
-            const resp = await API.post('/auth/logout', {});
+            const resp = await API.post('/auth/logout')
+            if(resp.status === 200 && resp.statusText === "OK"){
+                dispatch(eraseUser());
+                toast.success(resp.data.msg);
+            }
             
         } catch (err) {
+            dispatch(eraseUser());
             toast.error(err.message)
             console.log('logOut error', err)
         }

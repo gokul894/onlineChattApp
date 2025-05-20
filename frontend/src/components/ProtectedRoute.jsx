@@ -3,9 +3,9 @@ import { useAuthentication } from "../hooks/useAuthentication"
 import {Navigate} from "react-router-dom";
 
 function ProtectedRoute({children}) {
-    const { authUser } = useAuthentication();
+    const { loggedInUser } = useAuthentication();
 
-    return authUser.id ? children : <Navigate to="/login" replace />
+    return loggedInUser.id ? children : <Navigate to="/login" replace />
 }
 
 export default ProtectedRoute;
