@@ -3,7 +3,7 @@ import {useSelector} from "react-redux"
 
 function useAuthentication () {
 
-    const loggedInUser = useSelector(state => state.authStore.authUser);
+    const loggedInUser = useSelector(state => state.auth.authUser);
     
     return {loggedInUser}
 };

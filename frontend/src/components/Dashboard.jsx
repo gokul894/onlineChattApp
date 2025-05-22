@@ -7,12 +7,22 @@ import { API } from "../utils/Axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { eraseUser } from "../context/auth.storage";
+import { addFriend } from "../context/baatchit.storage";
+import Participants from "./Participants";
+import ViewCompo from "./ViewCompo";
+
 
 function Dashboard() {
 
   const navigator = useNavigate();
   const [setting, setSetting] = useState(false);
   const dispatch = useDispatch();
+
+  const user = useSelector(state => state.auth.authUser);
+  const friends = useSelector(state => state.chat.friends);
+
+  const [friendList, setFriendList] = useState(friends);
+  const [section2, setSection2] = useState({action:'default', userId:null});
 
   useEffect(() => {
     const authenticateUser = async () => {
@@ -30,22 +40,26 @@ function Dashboard() {
         navigator('/login')
       }
     }
-  
     authenticateUser();
-  },[])
+  },[]);
+
+  useEffect(() => {
+    setFriendList(friends);
+  }, [friends]);
+
 
   const humburgerHandler = (e) => {
     e.preventDefault();
 
     setSetting(!setting);
 
-  }
+  };
 
   const logoutHandler = async (e) => {
     e.preventDefault();
 
     try {
-      await API.post('/auth/logout');
+      const resp = await API.post('/auth/logout');
       dispatch(eraseUser());
       navigator('/login')
       toast.success(resp.data.sms)
@@ -54,10 +68,16 @@ function Dashboard() {
       console.log('logout error', error)
     }
 
+  };
+
+
+  const handleParticipantClick = (id) => {
+    setSection2({action:'chat', userId:id});
   }
 
-
-  const user = useSelector(state => state.authStore.authUser);
+  const handleSection2 = (e) => {
+    setSection2({action:e.currentTarget.id, userId:null});
+  };
 
   return (
     <div className='min-h-dvh bg-accent-light text-white flex flex-row'>
@@ -80,17 +100,45 @@ function Dashboard() {
                 <h1 className="text-red-400 hover:text-red-600" onClick={logoutHandler}>LogOut</h1>
               </div>
 
-            </> :<FaBars/>}
+            </> : <FaBars/>}
 
           </div>
 
           </div>
+              {/** friend list section */}
 
+        <section>
+              <div className='flex flex-col items-center text-black font-semibold'>
+                {
+                  (() => {
+                    let element = [];
 
-        <div className=''>lists of intracted users</div>
+                    for(const key in friendList){
+                      const friend = friendList[key];
+                      element.push(
+                        < Participants
+                        key={friend.friendUserId}
+                        data={{userId:friend.friendUserId, fullname:friend.fullname }}
+                        onClick={() => handleParticipantClick(friend.friendUserId)}
+                        />
+                      )
+                    }
+
+                    return element;
+
+                  })()
+                }
+
+                <div className="bg-cyan-300 w-[80%] text-center hover:cursor-pointer p-2 my-2 border-2 hover:bg-cyan-500 rounded-3xl"  id="adduser" onClick={handleSection2} >
+                  <h1>Add User</h1>
+                </div>
+
+              </div>
+        </section>
+        
       </div>
       <div className='w-[70%] bg-emerald-400'>
-        section2
+        <ViewCompo compoName={section2.action} userId={section2.userId } />  {/* section2 */}
       </div>
     </div>
   )

@@ -1,9 +1,9 @@
-import {configureStore, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 
 const userFromStorage = JSON.parse(localStorage.getItem('authUser'));
 
-const authStatus = createSlice({
+const authSlice = createSlice({
     name:"authStore",
 
     initialState: {
@@ -35,12 +35,5 @@ const authStatus = createSlice({
     }
 });
 
-export const {addUser, eraseUser} = authStatus.actions;
-
-const store = configureStore({
-    reducer: {
-        authStore:authStatus.reducer,
-    }
-});
-
-export default store;
+export const {addUser, eraseUser} = authSlice.actions;
+export default authSlice.reducer;

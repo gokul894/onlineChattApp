@@ -1,17 +1,20 @@
 
 import { app } from "./app.js";
 import { connectDb } from "./db/index.js";
+import { initSocket } from "./sockets/index.js";
 import { config } from "./utils/config.js";
+import http from "http";
 
-import {Server} from "socket.io"
+const server = http.createServer(app);
 
 connectDb()
 .then(() => {
-    const server = app.listen(config.port, ()=> {
-        console.log('server start successfully')
-    });
+    
+    initSocket(server);
 
-    // const io = new Server(server, );
+    server.listen(config.port, () => {
+        console.log('server start successfully');
+    });
 
 })
 .catch(err => {

@@ -4,7 +4,7 @@ import './index.css'
 import { Router } from './utils/Router'
 import { RouterProvider } from 'react-router-dom';
 import {Provider} from "react-redux";
-import store from './context/auth.storage.js';
+import store from './context/index.js';
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>

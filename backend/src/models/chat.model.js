@@ -19,7 +19,7 @@ const chatSchema = mongoose.Schema({
         required: true
     },
 
-    timestamp: {
+    time: {
         type:Date,
         default:Date.now
     }

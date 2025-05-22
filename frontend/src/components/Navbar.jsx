@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 // import { toast } from 'react-toastify';
@@ -14,7 +14,7 @@ function Navbar() {
 
   const navigate = useNavigate();
 
-  const authUser = useSelector((state) => state.authStore.authUser);
+  const authUser = useSelector((state) => state.auth.authUser);
 
   const profileImage = (e) => {
     e.preventDefault();

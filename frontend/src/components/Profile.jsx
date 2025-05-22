@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { API } from "../utils/Axios";
-import { eraseUser } from "../context/auth.storage";
+import { eraseUser } from "../context/auth.storage.js";
 
 
 function Profile() {
 
-    const { _, fullname, email, username} = useSelector(state => state.authStore.authUser);
+    const { _, fullname, email, username} = useSelector(state => state.auth.authUser);
     const dispatch = useDispatch();
 
 
