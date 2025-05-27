@@ -1,30 +1,21 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { useSelector } from "react-redux";
+import { createSlice } from "@reduxjs/toolkit";
 
-const getChatId = () => crypto.randomUUID();
-
-class friend {
-    constructor(friendUserId, fullname, email, chatId){
-        this.friendUserId = friendUserId;
-        this.fullname = fullname
-        this.email = email
-        this.chatId = chatId
-    }
-}
-
-class chat {
-    constructor(senderId, recieverId, text, time, delevered=false ) {
-        this.senderId = senderId
-        this.recieverId = recieverId
-        this.text = text
-        this.time = time
-        this.delevered = delevered 
-    }
+const getChatId = () => {
+  if (crypto && crypto.randomUUID) {
+    return crypto.randomUUID();
+  } else {
+    // Simple fallback UUID generator
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
 }
 
 
 const baatchitSlice = createSlice({
-    name:"battchitStorage",
+    name:"baatchitStorage",
 
     initialState:{
         friends:{}, 
@@ -38,11 +29,8 @@ const baatchitSlice = createSlice({
             //fistly create chatId
             const chatId = getChatId();
 
-            //create new friend object via friend class
-            const newFriend = new friend(friendUserId, fullname, email, chatId);
-
             //insert inside Friends initial state
-            state.friends[friendUserId] = newFriend;
+            state.friends[friendUserId] = { _id:friendUserId, fullname, email, chatId };
 
             //then create chat space for new friend like chats[chatId]: [];
             state.chats[chatId] = {};
@@ -57,27 +45,37 @@ const baatchitSlice = createSlice({
             delete state.chats[deleteChatId];
             delete state.friends[friendUserId];
 
-
         },
 
         addChat: function (state, action) {
-            const {authUserId, senderId, recieverId, text, time, delevered} = {...action.payload};
-            const particulurChatId = getChatId();
+            const {authUserId, senderId, recieverId, text, time, delivered} = {...action.payload};
+            console.log(action.payload);
 
-            //if me as a sender then
-            if(senderId === authUserId){
-                //firstly go to find frined chat id
-                const friendChatId = state.friends[recieverId].chatId;
+            if(senderId === authUserId){ // it means i know that how is reciever and i must have a reciever info in friends
 
-                // then add new chat into the frind chats
-                state.chats[friendChatId][particulurChatId] = new chat(senderId, recieverId, text, time, delevered);
+                const chatID = state.friends[recieverId].chatId;
+                state.chats[chatID][getChatId()] = { senderId, recieverId, text, time, delivered};
 
-            // if i'm not a sender then
-            }else{
-                const friendChatId = state.friends[senderId].chatId;
-                state.chats[friendChatId][particulurChatId] = new chat(senderId, recieverId, text, time);
+            }else{ // it means i'm reciever & either i know the friend or even not
+                //so firsly take a look in friend data that is this friend exist or not
+                const isFriendExist = state.friends[senderId];
+
+                if(isFriendExist){
+                    const chatID = isFriendExist.chatId;
+                    state.chats[chatID][getChatId()] = { senderId, recieverId, text, time, delivered};
+                }else{ //if i don't know the sender friend so do this
+                    const chatId = getChatId();
+                    state.friends[senderId] = {
+                        _id: senderId,
+                        fullname: String(senderId),
+                        email: null,
+                        chatId
+                        };
+                    state.chats[chatId] = {};
+                    state.chats[chatId][getChatId()] = { senderId, recieverId, text, time, delivered };
+                }
+
             }
-
         },
 
         deleteChat: function (state, action) {

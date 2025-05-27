@@ -12,16 +12,14 @@ app.use(express.json({limit:'16kb'}))
 app.use(express.urlencoded({extended:true, limit:"16kb"}))
 
 app.use(cors({
-    origin:config.cors_url,
+    origin:[config.cors_url, 'http://127.0.0.1:5127'],
     credentials:true,
-    methods:['POST'],
+    methods:['*'],
     exposedHeaders:['Authorization'],
     allowedHeaders: ['Authorization', 'Content-Type'],
 }))
 
 
-app.use('/api/auth', router);
-app.use('/api/sms', router);
-app.use('/api/recognize', router);
+app.use('/api', router);
 
 export {app};

@@ -59,6 +59,8 @@ const login = async (req, res) => {
         });
     };
 
+    console.log(usernameOremail, password)
+
 
     const user = await User.findOne({
         $or:[{username:usernameOremail},{ mail: usernameOremail }]
@@ -89,7 +91,7 @@ const login = async (req, res) => {
     await user.save({validate:false});
 
     const AuthUser = {
-        id:user._id,
+        _id:user._id,
         fullname:user.fullName,
         email:user.email,
         username:user.username

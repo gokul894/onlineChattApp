@@ -26,8 +26,8 @@ function Login() {
             const AuthUser =await response.data.data;
             const sms = await response.data.message;
 
-
-            if(AuthUser?.id){
+            console.log('here authUsr',AuthUser);
+            if(AuthUser?._id){
 
                 dispatch(addUser({...AuthUser}));
 

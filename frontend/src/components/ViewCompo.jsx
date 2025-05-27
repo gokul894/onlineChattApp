@@ -3,9 +3,8 @@ import ChatView from "./chatView";
 import DefaultPage from "./DefaultPage";
 
 function ViewCompo({compoName, userId}) {
-    const showCompo = compoName;
 
-    switch (showCompo){
+    switch (compoName){
         case 'adduser':
             return <>
             < AddNewFriend />

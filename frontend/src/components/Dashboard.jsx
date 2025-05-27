@@ -2,14 +2,14 @@
 import {useDispatch, useSelector} from "react-redux";
 import {FaBars} from "react-icons/fa"
 import { RxCross2 } from "react-icons/rx";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { API } from "../utils/Axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { eraseUser } from "../context/auth.storage";
-import { addFriend } from "../context/baatchit.storage";
 import Participants from "./Participants";
 import ViewCompo from "./ViewCompo";
+import { addsectionTwo } from "../context/sectionTwo.storage.js";
 
 
 function Dashboard() {
@@ -22,13 +22,15 @@ function Dashboard() {
   const friends = useSelector(state => state.chat.friends);
 
   const [friendList, setFriendList] = useState(friends);
-  const [section2, setSection2] = useState({action:'default', userId:null});
+
+  const {action, userId} = useSelector(state => state.sectionUpdate.sectionTwo);
 
   useEffect(() => {
-    const authenticateUser = async () => {
+    ( async () => {
       try {
         const resp = await API.get('/auth/authenticate');
-      
+
+        // console.log(resp.data)
         if(!resp?.data || resp.status !== 200){
           dispatch(eraseUser());
           navigator('/login')
@@ -39,8 +41,8 @@ function Dashboard() {
         toast.error('server error');
         navigator('/login')
       }
-    }
-    authenticateUser();
+    })();
+
   },[]);
 
   useEffect(() => {
@@ -70,13 +72,10 @@ function Dashboard() {
 
   };
 
+  const handleSection2 = (action, userId) => {
 
-  const handleParticipantClick = (id) => {
-    setSection2({action:'chat', userId:id});
-  }
-
-  const handleSection2 = (e) => {
-    setSection2({action:e.currentTarget.id, userId:null});
+    dispatch(addsectionTwo({action, userId}));
+    // setSection2({action:e.currentTarget.id, userId:null});
   };
 
   return (
@@ -117,9 +116,9 @@ function Dashboard() {
                       const friend = friendList[key];
                       element.push(
                         < Participants
-                        key={friend.friendUserId}
-                        data={{userId:friend.friendUserId, fullname:friend.fullname }}
-                        onClick={() => handleParticipantClick(friend.friendUserId)}
+                        key={friend._id}
+                        data={{userId:friend._id, fullname:friend.fullname }}
+                        onClick={() => handleParticipantClick(friend._id)}
                         />
                       )
                     }
@@ -129,7 +128,7 @@ function Dashboard() {
                   })()
                 }
 
-                <div className="bg-cyan-300 w-[80%] text-center hover:cursor-pointer p-2 my-2 border-2 hover:bg-cyan-500 rounded-3xl"  id="adduser" onClick={handleSection2} >
+                <div className="bg-cyan-300 w-[80%] text-center hover:cursor-pointer p-2 my-2 border-2 hover:bg-cyan-500 rounded-3xl"  id="adduser" onClick={() => handleSection2('adduser', null)} >
                   <h1>Add User</h1>
                 </div>
 
@@ -138,7 +137,7 @@ function Dashboard() {
         
       </div>
       <div className='w-[70%] bg-emerald-400'>
-        <ViewCompo compoName={section2.action} userId={section2.userId } />  {/* section2 */}
+        <ViewCompo compoName={ action } userId={ userId } />  {/* section2 */}
       </div>
     </div>
   )

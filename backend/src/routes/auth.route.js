@@ -8,10 +8,10 @@ import { isFriend } from "../controllers/recog.controller.js";
 const router = Router();
 
 //auth routes
-router.post('/ragister', ragister);
-router.post('/login', login);
-router.post('/logout', verifyJwt, logout);
-router.get('/authenticate', verifyJwt, authenticate);
+router.post('/auth/ragister', ragister);
+router.post('/auth/login', login);
+router.post('/auth/logout', verifyJwt, logout);
+router.get('/auth/authenticate', verifyJwt, authenticate);
 router.post('/isfriend', verifyJwt, isFriend);
 
 
@@ -20,4 +20,4 @@ router.post('/isfriend', verifyJwt, isFriend);
 
 
 
-export {router};
+export {router};;
