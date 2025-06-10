@@ -1,122 +1,123 @@
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
+
 import { onlineUsers } from "./onlineUsersMap.js";
 import { config } from "../utils/config.js";
 import { ApiError } from "../utils/ApiError.js";
-import jwt from "jsonwebtoken";
 import chat from "../models/chat.model.js";
-import cookie from "cookie";
 
 let io;
 
 const socketCorsConfig = {
-  origin: [config.cors_url, 'http://127.0.0.1:5127'],
+  origin: [config.cors_url, "http://127.0.0.1:5127"],
   credentials: true,
 };
 
 const initSocket = (server) => {
-  io = new Server(server, {
-    cors: socketCorsConfig,
-  });
+  io = new Server(server, { cors: socketCorsConfig });
 
+  // Middleware: Authenticate socket connection using JWT from cookies
   io.use((socket, next) => {
-    const rawCookies = socket.handshake.headers.cookie || "";
-    const cookies = cookie.parse(rawCookies);
-    const token = cookies.accessToken;
-
-    if (!token) return next(new ApiError(401, "No cookie set"));
-
     try {
+      const rawCookies = socket.handshake.headers.cookie || "";
+      const cookies = cookie.parse(rawCookies);
+      const token = cookies.accessToken;
+
+      if (!token) return next(new ApiError(401, "No access token cookie"));
+
       const user = jwt.verify(token, config.access_token_secret);
       socket.user = user;
-      console.log('here socket user ', socket.user, 'socket id', socket.id)
+
+      console.log("Socket authenticated:", socket.user, "Socket ID:", socket.id);
       next();
     } catch (error) {
       return next(new ApiError(401, "Invalid token"));
     }
   });
 
+  // Main socket connection handler
   io.on("connection", async (socket) => {
+    const userId = socket.user?._id;
+
+    // Register user socket ID
     socket.on("auth", async (userId) => {
       onlineUsers.set(userId, socket.id);
+      console.log("User connected:", { userId, socketId: socket.id });
 
-      //here when user get connected with websocket then i should find the chat which is undeleverd to that user if there be so send that chat to the user and delet thos chat 
+      // Find and deliver undelivered messages
       try {
-        
-        const undeleverdMessage = await chat.find({ receiver:userId });
+        const undeliveredMessages = await chat.find({ receiver: userId });
+        console.log("Undelivered messages:", undeliveredMessages.length);
 
-        console.log('Undeleverd messages..', undeleverdMessage.length);
-
-        //send echa message to the client and delete those after sending
-        for(const message of undeleverdMessage){
-          io.to(socket.id).emit("recieve_message", {
-            senderId: message.sender.toString(),
-            text: message.content,
-            time: message.time,
-            delivered: true
-          }, async (ackData) => {
+        for (const message of undeliveredMessages) {
+          io.to(socket.id).emit(
+            "recieve_message",
+            {
+              senderId: message.sender.toString(),
+              text: message.content,
+              time: message.time,
+              delivered: true,
+            },
+            async (ackData) => {
               await chat.findByIdAndDelete(message._id);
-              console.log('ackData line 58', ackData);
-              console.log(`Message ${message._id} deleted after acknowledgment.`);
-          });
-        };
-
+              console.log("Message acknowledged and deleted:", ackData);
+            }
+          );
+        }
       } catch (error) {
-        console.error("Error fetching/sending/deleting unsent messages.. ", error);
+        console.error("Error handling undelivered messages:", error);
       }
-
-      console.log('userId',userId, 'socketId',socket.id);
     });
 
-    try {
-      const userId = socket.user?._id;
-      const chats = await chat.find({ receiver: userId });
-      // console.log("Unused user chat", chats);
-     
-    } catch (error) {
-      throw new ApiError(501, "Not able to fetch chats from database.");
-    }
-
+    // Handle private messages
     socket.on("private_message", async (data, callback) => {
-      const { recieverId, text, time } = {...data};
-      // console.log('recieverId line 55 socket/index.js', recieverId)
+      const { recieverId, text, time } = data;
       const recieverSocketId = onlineUsers.get(recieverId);
-      console.log('recieverSocketId',recieverSocketId)
-      console.log('all onlineUser kyes', Array.from(onlineUsers.keys()))
       const senderId = socket.user._id;
 
-      // console.log('socket/index.js receiverSocketId', recieverSocketId)
       if (recieverSocketId) {
-        console.log('socket/index.js line 63 senderid', senderId)
-        io.to(recieverSocketId).emit("recieve_message", { senderId, text, time, delivered: true }, callback({ status: "delivered" }));
+        // Receiver is online - deliver immediately
+        io.to(recieverSocketId).emit(
+          "recieve_message",
+          { senderId, text, time, delivered: true },
+          callback({ status: "delivered" })
+        );
       } else {
-
-        // console.log('executing create chat in database line 63 index.js')
+        // Receiver is offline - store message in DB
         try {
-          await chat.create({ //here some problem with creating chat in database 
-          sender: socket.user._id,
-          receiver: recieverId,
-          content: text,
-          time: time,
+          await chat.create({
+            sender: senderId,
+            receiver: recieverId,
+            content: text,
+            time,
           });
-
-          callback({ status: "failed" });
+          callback({ status: "failed" }); // Marked as failed for now
         } catch (error) {
-          console.log('creting chat erro in database', error)
+          console.error("Failed to store message in DB:", error);
         }
       }
     });
 
+    // Handle disconnection
     socket.on("disconnect", () => {
       if (socket.user) {
         onlineUsers.delete(socket.user._id);
         console.log(`User ${socket.user._id} disconnected.`);
       }
     });
+
+    try {
+      await chat.find({ receiver: userId });
+    } catch (error) {
+      throw new ApiError(501, "Unable to fetch user chats.");
+    }
   });
 };
 
+// Helper to get initialized socket.io instance
 function getIO() {
-  if (!io) throw new ApiError(501, "Socket not properly created");
+  if (!io) throw new ApiError(501, "Socket.IO not initialized");
   return io;
 }
 
